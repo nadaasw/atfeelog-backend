@@ -1,0 +1,134 @@
+package hello.atfeelogbackend.domain.board.resolver;
+
+import hello.atfeelogbackend.domain.board.dto.*;
+import hello.atfeelogbackend.domain.board.entity.Board;
+import hello.atfeelogbackend.domain.board.service.BoardService;
+import hello.atfeelogbackend.domain.user.entity.User;
+import hello.atfeelogbackend.global.auth.CustomUserDetails;
+import lombok.RequiredArgsConstructor;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+
+import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+@RequiredArgsConstructor
+public class BoardResolver {
+
+    private final BoardService boardService;
+
+    @PreAuthorize("isAuthenticated()")
+    @MutationMapping
+    public FetchBoardResponse createBoard(@Argument CreateBoardInput createBoardInput, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return new  FetchBoardResponse(boardService.save(createBoardInput, customUserDetails.getUserId()));
+    }
+
+    @QueryMapping
+    public FetchBoardResponse fetchBoard(@Argument Long boardId) {
+        return new FetchBoardResponse(boardService.findById(boardId));
+    }
+
+    @QueryMapping
+    public List<FetchBoardResponse> fetchBoards(@Argument LocalDateTime end,
+                                                @Argument LocalDateTime start,
+                                                @Argument String search,
+                                                @Argument Integer page) {
+
+        return boardService.fetchBoards(end, start, search, page);
+    }
+
+    @QueryMapping
+    public int fetchBoardsCount(@Argument LocalDateTime end,
+                                @Argument LocalDateTime start,
+                                @Argument String search){
+        return boardService.fetchBoardsCount(end, start, search);
+    }
+
+    @QueryMapping
+    public int fetchBoardsCountOfMine(@AuthenticationPrincipal CustomUserDetails principal) {
+        Long userId = principal.getUserId();
+
+        return boardService.fetchBoardOfMineCount(userId);
+    }
+
+    @QueryMapping
+    public List<FetchBoardResponse> fetchBoardsOfMine(@AuthenticationPrincipal CustomUserDetails principal) {
+        Long userId = principal.getUserId();
+        return boardService.fetchBoardOfMine(userId);
+    }
+
+    @QueryMapping
+    public List<CommentDto> fetchBoardComments(@Argument Integer page,@Argument Long boardId) {
+        return boardService.fetchComments(boardId, page);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @MutationMapping
+    public FetchBoardResponse updateBoard(@Argument UpdateBoardInput updateBoardInput, @Argument Long boardId) {
+        return new FetchBoardResponse(boardService.update(boardId, updateBoardInput));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @MutationMapping
+    public Long deleteBoard(@Argument Long boardId ,@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
+
+        return boardService.delete(boardId, userId);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @MutationMapping
+    public List<Long> deleteBoards(@Argument List<Long> boardIds, @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        Long userId = userDetails.getUserId();
+        List<Long> deletedBoardIds = new ArrayList<>();
+        for (Long boardId : boardIds) {
+            try{
+                deletedBoardIds.add(boardService.delete(boardId, userId));
+            }catch (Exception e) {
+                continue;
+            }
+
+        }
+        return deletedBoardIds;
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @MutationMapping
+    public int likeBoard(@Argument Long boardId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
+        return boardService.likeBoard(boardId, userId);
+    }
+
+
+    @PreAuthorize("isAuthenticated()")
+    @MutationMapping
+    public CommentDto createBoardComment(@Argument CreateBoardCommentInput request, @Argument Long boardId,
+                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
+
+        return new CommentDto(boardService.createComment(request, boardId, userId));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @MutationMapping
+    public Long deleteBoardComment(@Argument Long boardId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
+        return boardService.deleteComment(boardId, userId);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @MutationMapping
+    public CommentDto updateBoardComment(@Argument Long commentId, @Argument String content,
+                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
+        return boardService.updateComment(commentId, content, userId);
+    }
+}

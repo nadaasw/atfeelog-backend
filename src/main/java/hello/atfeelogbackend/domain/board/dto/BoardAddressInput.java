@@ -1,0 +1,18 @@
+package hello.atfeelogbackend.domain.board.dto;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class BoardAddressInput {
+    // zipcode: String
+    //  address: String
+    //  addressDetail: String
+
+    private String placeName;
+    private String addressName;
+    private String roadAddressName;
+    private String x;
+    private String y;
+}

@@ -1,0 +1,134 @@
+# A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+scalar DateTime
+
+
+type User {
+  id: ID!
+  email: String!
+  name: String!
+  picture: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type BoardAddress {
+  id: ID!
+  placeName: String
+  addressName: String
+  roadAddressName: String
+  x: String
+  y: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Board {
+  id: ID!
+  user: User
+  artist: String!
+  concert: String!
+  contents: String!
+  boardAddress: BoardAddress
+  images: [String!]
+  comments: [BoardComment]
+  commentCount: Int!
+  likeCount: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type BoardComment {
+  id: ID!
+  content: String!
+  user: User
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+type Token {
+  accessToken: String!
+}
+type FileManager{
+  _id: ID!
+  url: String!
+  size: Float
+  isUsed: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
+type Query {
+  fetchBoard(boardId: ID!): Board!
+  fetchBoards(endDate: DateTime, startDate: DateTime, search: String, page: Int): [Board!]!
+  fetchBoardsCount(endDate: DateTime, startDate: DateTime, search: String): Int!
+  fetchBoardsCountOfMine: Int!
+  fetchBoardsOfMine: [Board!]!
+  fetchBoardComments(page: Int, boardId: ID!): [BoardComment!]!
+  fetchUserLoggedIn: User!
+}
+
+
+type Mutation {
+  createBoard(createBoardInput: CreateBoardInput!): Board!
+  updateBoard(updateBoardInput: UpdateBoardInput!, boardId: ID!): Board!
+  deleteBoard(boardId: ID!): ID!
+  deleteBoards(boardIds: [ID!]!): [ID!]!
+  likeBoard(boardId: ID!): Int!
+
+  createBoardComment(createBoardCommentInput: CreateBoardCommentInput!, boardId: ID!): BoardComment!
+  deleteBoardComment(boardId: ID!): ID!
+  updateBoardComment(commentId: ID!, content: String!): BoardComment!
+
+  # User mutation
+  createUser(createUserInput: CreateUserInput!): User!
+  loginUser(password: String!, email: String!): Token!
+  logoutUser: Boolean!
+  resetUserPassword(password: String!): Boolean!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+
+  restoreAccessToken: Token!
+
+}
+
+
+
+input CreateUserInput {
+  email: String!
+  name: String!
+  password: String!
+}
+
+input UpdateUserInput {
+  name: String
+  password: String
+  picture: String
+}
+
+
+input CreateBoardInput {
+  artist: String!
+  concertName: String!
+  contents: String!
+  boardAddressInput: BoardAddressInput
+  images: [String!]
+}
+
+input UpdateBoardInput {
+  artist: String
+  concertName: String
+  contents: String
+  boardAddressInput: BoardAddressInput
+  images: [String!]
+}
+
+input BoardAddressInput {
+  placeName: String
+  addressName: String
+  roadAddressName: String
+  x: String
+  y: String
+}
+
+input CreateBoardCommentInput {
+  content: String!
+}
