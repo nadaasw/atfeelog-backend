@@ -8,9 +8,33 @@ services:
     ports:
       - "3306:3306"
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7
     container_name: atfeelog-redis
     ports:
-    - "6379:6379"
+      - "6379:6379"
+
+  app:
+    build: .
+    container_name: atfeelog-app
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/atfeelog?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: "1234"
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started

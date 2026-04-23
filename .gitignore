@@ -38,3 +38,6 @@ out/
 
 ### Spring ###
 application.yml
+
+### Env ###
+.env
