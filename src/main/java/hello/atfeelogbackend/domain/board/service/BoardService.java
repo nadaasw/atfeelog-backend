@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,10 +45,12 @@ public class BoardService {
 
         Board board = boardRepository.save(
                 Board.builder()
-                        .artist(createBoardInput.getArtist())
+                        .title(createBoardInput.getTitle())
+                        .artistName(createBoardInput.getArtistName())
                         .user(user)
-                        .concert(createBoardInput.getConcertName())
+                        .showName(createBoardInput.getShowName())
                         .contents(createBoardInput.getContents())
+                        .showDate(createBoardInput.getShowDate())
                         .build()
         );
 
@@ -57,8 +59,8 @@ public class BoardService {
         if (boardAddressInput != null) {
             BoardAddress boardAddress = BoardAddress.builder()
                     .placeName(boardAddressInput.getPlaceName())
-                    .addressName(boardAddressInput.getAddressName())
-                    .roadAddressName(boardAddressInput.getRoadAddressName())
+                    .jibunAddress(boardAddressInput.getJibunAddress())
+                    .roadAddress(boardAddressInput.getRoadAddress())
                     .x(boardAddressInput.getX())
                     .y(boardAddressInput.getY())
                     .board(board)
@@ -74,6 +76,10 @@ public class BoardService {
         return boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("NO DATA FOUND"));
     }
 
+    public List<String> findTopKeyword(){
+        return boardRepository.findTopKeywords();
+    }
+
     @Transactional
     public Board update(Long boardId, UpdateBoardInput updateBoardInput) {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new IllegalArgumentException("NO DATA FOUND"));
@@ -81,10 +87,10 @@ public class BoardService {
         if(updateBoardInput.getBoardAddressInput() != null) {
             BoardAddress boardAddress = boardAddressRepository.findByBoard(board);
             BoardAddressInput boardAddressInput = updateBoardInput.getBoardAddressInput();
-            boardAddress.update(boardAddressInput.getPlaceName(), boardAddressInput.getAddressName(), boardAddressInput.getRoadAddressName(), boardAddressInput.getX(), boardAddressInput.getY());
+            boardAddress.update(boardAddressInput.getPlaceName(), boardAddressInput.getJibunAddress(), boardAddressInput.getRoadAddress(), boardAddressInput.getX(), boardAddressInput.getY());
         }
 
-        board.update(updateBoardInput.getArtist(), updateBoardInput.getConcertName(), updateBoardInput.getContents(), updateBoardInput.getImages());
+        board.update(updateBoardInput.getTitle(), updateBoardInput.getArtistName(), updateBoardInput.getShowName(), updateBoardInput.getContents(), updateBoardInput.getImages(), updateBoardInput.getShowDate());
 
         return board;
     }
@@ -98,7 +104,7 @@ public class BoardService {
         return id;
     }
 
-    public List<FetchBoardResponse> fetchBoards(LocalDateTime start, LocalDateTime end, String search, Integer page) {
+    public List<FetchBoardResponse> fetchBoards(OffsetDateTime start, OffsetDateTime end, String search, Integer page) {
         Pageable pageable = PageRequest.of(page != null ? page - 1 : 0, 10,
                 Sort.by("createdAt").descending());
 
@@ -111,7 +117,7 @@ public class BoardService {
         return fetchBoardResponses;
     }
 
-    public int fetchBoardsCount(LocalDateTime start, LocalDateTime end, String search) {
+    public int fetchBoardsCount(OffsetDateTime start, OffsetDateTime end, String search) {
         Page<Board> page = boardRepository.searchBoards(search, start, end, PageRequest.of(0, 1));
         return (int) page.getTotalElements();
     }
@@ -128,6 +134,30 @@ public class BoardService {
     public int fetchBoardOfMineCount(Long userId){
         List<Board> boards = boardRepository.findAllByUserId(userId);
         return boards.size();
+    }
+
+    public List<FetchBoardsLikeResponse> fetchBoardsLike(Long userId){
+        List<BoardLike> likes = boardLikeRepository.findByUserId(userId);
+        List<FetchBoardsLikeResponse> fetchBoardsLikeResponses = new ArrayList<>();
+        for(BoardLike boardLike : likes){
+            Board board = boardLike.getBoard();
+            fetchBoardsLikeResponses.add(new FetchBoardsLikeResponse(board, true));
+        }
+
+        return fetchBoardsLikeResponses;
+    }
+
+    public List<FetchBoardResponse> fetchBoardsOfBest(){
+        Pageable pageable = PageRequest.of(0, 5);
+
+        List<Board> boards = boardRepository.findBoardsOfBest(pageable);
+
+        List<FetchBoardResponse> fetchBoardResponses = new ArrayList<>();
+        for (Board board : boards) {
+            fetchBoardResponses.add(new FetchBoardResponse(board));
+        }
+
+        return fetchBoardResponses;
     }
 
     public List<CommentDto> fetchComments(Long boardId, Integer page) {

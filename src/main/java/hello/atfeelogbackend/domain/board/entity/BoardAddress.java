@@ -30,9 +30,9 @@ public class BoardAddress {
 
     private String placeName;
 
-    private String addressName;
+    private String jibunAddress;
 
-    private String roadAddressName;
+    private String roadAddress;
 
     private String x;
 
@@ -44,18 +44,18 @@ public class BoardAddress {
     @LastModifiedDate
     private OffsetDateTime updatedAt;
 
-    public BoardAddress(String placeName, String addressName, String roadAddressName, String x, String y) {
+    public BoardAddress(String placeName, String jibunAddress, String roadAddress, String x, String y) {
         this.placeName = placeName;
-        this.addressName = addressName;
-        this.roadAddressName = roadAddressName;
+        this.jibunAddress = jibunAddress;
+        this.roadAddress = roadAddress;
         this.x = x;
         this.y = y;
     }
 
-    public void update(String placeName, String addressName, String roadAddressName, String x, String y) {
+    public void update(String placeName, String jibunAddress, String roadAddress, String x, String y) {
         this.placeName = placeName;
-        this.addressName = addressName;
-        this.roadAddressName = roadAddressName;
+        this.jibunAddress = jibunAddress;
+        this.roadAddress = roadAddress;
         this.x = x;
         this.y = y;
     }

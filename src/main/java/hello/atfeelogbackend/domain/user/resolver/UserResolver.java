@@ -56,6 +56,7 @@ public class UserResolver {
     @MutationMapping
     public LoginResponse loginUser(@Argument String email, @Argument String password) {
 
+
         // RequestContextHolder에서 꺼내기
         HttpServletResponse response = ((ServletRequestAttributes)
                 RequestContextHolder.currentRequestAttributes()).getResponse();

@@ -2,16 +2,22 @@ package hello.atfeelogbackend.domain.board.dto;
 
 import hello.atfeelogbackend.domain.board.entity.Board;
 import hello.atfeelogbackend.domain.user.dto.UserDto;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+@Getter
+@Setter
 public class FetchBoardResponse {
     private Long id;
     private UserDto user;
-    private String artist;
-    private String concert;
+    private String title;
+    private String artistName;
+    private String showName;
+    private OffsetDateTime showDate;
     private String contents;
     private BoardAddressDto boardAddress;
     private List<String> images;
@@ -23,8 +29,10 @@ public class FetchBoardResponse {
     public FetchBoardResponse(Board boar) {
         this.id = boar.getId();
         this.user = new UserDto(boar.getUser());
-        this.artist = boar.getArtist();
-        this.concert = boar.getConcert();
+        this.title = boar.getTitle();
+        this.artistName = boar.getArtistName();
+        this.showName = boar.getShowName();
+        this.showDate = boar.getShowDate();
         this.contents = boar.getContents();
         this.boardAddress = boar.getBoardAddress() != null ? new BoardAddressDto(boar.getBoardAddress()) : null;
         this.images = boar.getImages();

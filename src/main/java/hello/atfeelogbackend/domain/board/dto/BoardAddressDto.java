@@ -13,8 +13,8 @@ import java.time.OffsetDateTime;
 public class BoardAddressDto {
     private Long id;
     private String placeName;
-    private String addressName;
-    private String roadAddressName;
+    private String jibunAddress;
+    private String roadAddress;
     private String x;
     private String y;
     private OffsetDateTime createdAt;
@@ -23,8 +23,8 @@ public class BoardAddressDto {
     public BoardAddressDto(BoardAddress boardAddress) {
         this.id = boardAddress.getId();
         this.placeName = boardAddress.getPlaceName();
-        this.addressName = boardAddress.getAddressName();
-        this.roadAddressName = boardAddress.getRoadAddressName();
+        this.jibunAddress = boardAddress.getJibunAddress();
+        this.roadAddress = boardAddress.getRoadAddress();
         this.x = boardAddress.getX();
         this.y = boardAddress.getY();
         this.createdAt = boardAddress.getCreatedAt();

@@ -11,8 +11,8 @@ public class BoardAddressInput {
     //  addressDetail: String
 
     private String placeName;
-    private String addressName;
-    private String roadAddressName;
+    private String jibunAddress;
+    private String roadAddress;
     private String x;
     private String y;
 }

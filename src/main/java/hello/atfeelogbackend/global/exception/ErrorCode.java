@@ -14,6 +14,7 @@ public enum ErrorCode {
 
 
     // User
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User Not Found"),
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "Invalid Input"),
     LOGOUT_ERROR(HttpStatus.UNAUTHORIZED, "Logout Error"),
     USER_UPDATE_ERROR(HttpStatus.BAD_REQUEST, "User Update Error"),

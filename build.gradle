@@ -48,6 +48,9 @@ dependencies {
     // aws
     implementation 'software.amazon.awssdk:s3:2.25.0'
 
+    // aop
+    implementation 'org.aspectj:aspectjweaver'
+
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.graphql:spring-graphql-test'

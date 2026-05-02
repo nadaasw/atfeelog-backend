@@ -14,21 +14,23 @@ type User {
 type BoardAddress {
   id: ID!
   placeName: String
-  addressName: String
-  roadAddressName: String
+  jibunAddress: String
+  roadAddress: String
   x: String
   y: String
   createdAt: DateTime!
   updatedAt: DateTime!
 }
-
 type Board {
   id: ID!
   user: User
-  artist: String!
-  concert: String!
+  title: String!
+  artistName: String!
+  showName: String!
+  showDate: DateTime
   contents: String!
   boardAddress: BoardAddress
+  isLiked: Boolean
   images: [String!]
   comments: [BoardComment]
   commentCount: Int!
@@ -63,6 +65,9 @@ type Query {
   fetchBoardsCount(endDate: DateTime, startDate: DateTime, search: String): Int!
   fetchBoardsCountOfMine: Int!
   fetchBoardsOfMine: [Board!]!
+  fetchBoardsLike: [Board!]!
+  fetchBoardsOfBest: [Board!]!
+  fetchBoardsKeyword: [String!]!
   fetchBoardComments(page: Int, boardId: ID!): [BoardComment!]!
   fetchUserLoggedIn: User!
 }
@@ -106,16 +111,20 @@ input UpdateUserInput {
 
 
 input CreateBoardInput {
-  artist: String!
-  concertName: String!
+  title: String!
+  artistName: String!
+  showName: String!
+  showDate: DateTime
   contents: String!
   boardAddressInput: BoardAddressInput
   images: [String!]
 }
 
 input UpdateBoardInput {
-  artist: String
-  concertName: String
+  title: String
+  artistName: String
+  showName: String
+  showDate: DateTime
   contents: String
   boardAddressInput: BoardAddressInput
   images: [String!]
@@ -123,8 +132,8 @@ input UpdateBoardInput {
 
 input BoardAddressInput {
   placeName: String
-  addressName: String
-  roadAddressName: String
+  jibunAddress: String
+  roadAddress: String
   x: String
   y: String
 }

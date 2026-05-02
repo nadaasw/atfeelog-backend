@@ -53,7 +53,7 @@ public class UserService {
     }
 
     public User findByEmail(String email){
-        return userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
     public boolean validateUser(String email, String password){

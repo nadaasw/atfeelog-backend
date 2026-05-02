@@ -8,23 +8,66 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long> {
-    @Query("SELECT b FROM Board b WHERE " +
-            "(b.concert LIKE %:search% OR b.artist LIKE %:search%) " +
+    @Query("SELECT b FROM Board b " +
+            "LEFT JOIN  fetch  b.boardAddress " +
+            "WHERE (:search IS NULL OR b.showName LIKE %:search% OR b.artistName LIKE %:search% OR b.title LIKE %:search% OR b.contents LIKE %:search%) " +
             "AND (:start IS NULL OR b.createdAt >= :start) " +
             "AND (:end IS NULL OR b.createdAt <= :end)")
     Page<Board> searchBoards(
             @Param("search") String search,
-            @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end,
+            @Param("start") OffsetDateTime start,
+            @Param("end") OffsetDateTime end,
             Pageable pageable
     );
 
+//    @Query(value = "SELECT b FROM Board b " +
+//            "JOIN FETCH b.user " +
+//            "LEFT JOIN FETCH b.boardAddress " +
+//            "WHERE (:search IS NULL OR b.showName LIKE %:search% OR b.artistName LIKE %:search% OR b.title LIKE %:search% OR b.contents LIKE %:search%) " +
+//            "AND (:start IS NULL OR b.createdAt >= :start) " +
+//            "AND (:end IS NULL OR b.createdAt <= :end)",
+//            countQuery = "SELECT COUNT(b) FROM Board b " +
+//                    "WHERE (:search IS NULL OR b.showName LIKE %:search% OR b.artistName LIKE %:search% OR b.title LIKE %:search% OR b.contents LIKE %:search%) " +
+//                    "AND (:start IS NULL OR b.createdAt >= :start) " +
+//                    "AND (:end IS NULL OR b.createdAt <= :end)")
+//    Page<Board> searchBoards1(
+//            @Param("search") String search,
+//            @Param("start") OffsetDateTime start,
+//            @Param("end") OffsetDateTime end,
+//            Pageable pageable
+//    );
+
+    @Query("SELECT b FROM Board b ORDER BY size(b.likes) DESC, b.createdAt DESC")
+    List<Board> findBoardsOfBest(Pageable pageable);
+
     List<Board> findAllByUserId(Long userId);
+
+
+    // N+1 문제 해결 시도
+    @Query("SELECT b FROM Board b " +
+            "JOIN FETCH b.user " +
+            "LEFT JOIN  fetch b.images " +
+            "WHERE b.id = :id"
+    )
+    Optional<Board> fetchBoardById(@Param("id") Long id);
+
+
+    // 인기 키워드
+    @Query(value = "SELECT keyword FROM (" +
+            " SELECT  artist_name as keyword FROM board " +
+            " UNION ALL " +
+            " SELECT show_name as keyword FROM board" +
+            ") combined " +
+            "GROUP BY keyword " +
+            "ORDER BY COUNT(*) DESC " +
+            "LIMIT 5",
+            nativeQuery = true)
+    List<String> findTopKeywords();
 
 }

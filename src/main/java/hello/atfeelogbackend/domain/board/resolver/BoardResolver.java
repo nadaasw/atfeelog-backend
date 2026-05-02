@@ -14,7 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 
 import java.nio.file.AccessDeniedException;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,21 +36,27 @@ public class BoardResolver {
     }
 
     @QueryMapping
-    public List<FetchBoardResponse> fetchBoards(@Argument LocalDateTime end,
-                                                @Argument LocalDateTime start,
+    public List<FetchBoardResponse> fetchBoards(@Argument OffsetDateTime endDate,
+                                                @Argument OffsetDateTime startDate,
                                                 @Argument String search,
                                                 @Argument Integer page) {
 
-        return boardService.fetchBoards(end, start, search, page);
+        return boardService.fetchBoards(startDate, endDate, search, page);
     }
 
     @QueryMapping
-    public int fetchBoardsCount(@Argument LocalDateTime end,
-                                @Argument LocalDateTime start,
+    public int fetchBoardsCount(@Argument OffsetDateTime endDate,
+                                @Argument OffsetDateTime startDate,
                                 @Argument String search){
-        return boardService.fetchBoardsCount(end, start, search);
+        return boardService.fetchBoardsCount(startDate, endDate, search);
     }
 
+    @QueryMapping
+    public List<String> fetchBoardsKeyword(){
+        return boardService.findTopKeyword();
+    }
+
+    @PreAuthorize("isAuthenticated()")
     @QueryMapping
     public int fetchBoardsCountOfMine(@AuthenticationPrincipal CustomUserDetails principal) {
         Long userId = principal.getUserId();
@@ -58,15 +64,28 @@ public class BoardResolver {
         return boardService.fetchBoardOfMineCount(userId);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @QueryMapping
     public List<FetchBoardResponse> fetchBoardsOfMine(@AuthenticationPrincipal CustomUserDetails principal) {
         Long userId = principal.getUserId();
         return boardService.fetchBoardOfMine(userId);
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @QueryMapping
+    public List<FetchBoardsLikeResponse> fetchBoardsLike(@AuthenticationPrincipal CustomUserDetails principal) {
+        Long userId = principal.getUserId();
+        return boardService.fetchBoardsLike(userId);
+    }
+
     @QueryMapping
     public List<CommentDto> fetchBoardComments(@Argument Integer page,@Argument Long boardId) {
         return boardService.fetchComments(boardId, page);
+    }
+
+    @QueryMapping
+    public List<FetchBoardResponse> fetchBoardsOfBest(){
+        return boardService.fetchBoardsOfBest();
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -110,11 +129,11 @@ public class BoardResolver {
 
     @PreAuthorize("isAuthenticated()")
     @MutationMapping
-    public CommentDto createBoardComment(@Argument CreateBoardCommentInput request, @Argument Long boardId,
+    public CommentDto createBoardComment(@Argument CreateBoardCommentInput createBoardCommentInput, @Argument Long boardId,
                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
 
-        return new CommentDto(boardService.createComment(request, boardId, userId));
+        return new CommentDto(boardService.createComment(createBoardCommentInput, boardId, userId));
     }
 
     @PreAuthorize("isAuthenticated()")

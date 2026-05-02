@@ -3,6 +3,7 @@ package hello.atfeelogbackend.domain.board.entity;
 import hello.atfeelogbackend.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -28,18 +29,26 @@ public class Board {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "artist", nullable = false)
-    private String artist;
+    @Column(name = "title", nullable = false)
+    private String title;
 
-    @Column(name = "concert", nullable = false)
-    private String concert;
+    @Column(name = "artist_name", nullable = false)
+    private String artistName;
+
+    @Column(name = "show_name", nullable = false)
+    private String showName;
+
+    @Column(name = "show_date")
+    private OffsetDateTime showDate;
 
     @Column(name = "contents", nullable = false)
     private String contents;
 
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardComment> comments = new ArrayList<>();
 
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardLike> likes = new ArrayList<>();
 
@@ -55,19 +64,22 @@ public class Board {
     @LastModifiedDate
     private OffsetDateTime updatedAt;
 
-    public Board( String artist, User user, String concert, String contents, List<String> images) {
-        this.artist = artist;
+    public Board(String title, String artistName, User user, String showName, String contents, List<String> images, OffsetDateTime showDate) {
+        this.title = title;
+        this.artistName = artistName;
         this.user = user;
-        this.concert = concert;
+        this.showName = showName;
         this.contents = contents;
         this.images = images;
+        this.showDate = showDate;
     }
 
-
-    public void update(String artist, String concert, String contents, List<String> images) {
-        if(artist != null) this.artist = artist;
-        if(concert != null) this.concert = concert;
+    public void update(String title, String artistName, String showName, String contents, List<String> images, OffsetDateTime showDate) {
+        if(title != null) this.title = title;
+        if(artistName != null) this.artistName = artistName;
+        if(showName != null) this.showName = showName;
         if(contents != null) this.contents = contents;
         if(images != null) this.images = images;
+        if(showDate != null) this.showDate = showDate;
     }
 }

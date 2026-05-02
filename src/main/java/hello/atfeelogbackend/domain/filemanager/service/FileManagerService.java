@@ -2,6 +2,8 @@ package hello.atfeelogbackend.domain.filemanager.service;
 
 import hello.atfeelogbackend.domain.filemanager.entity.FileManager;
 import hello.atfeelogbackend.domain.filemanager.repository.FileManagerRepository;
+import hello.atfeelogbackend.global.exception.CustomException;
+import hello.atfeelogbackend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,19 +25,27 @@ public class FileManagerService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    public String upload(MultipartFile file) throws IOException {
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+    public String upload(MultipartFile file) {
 
-        s3Client.putObject(
-                PutObjectRequest.builder()
-                        .bucket(bucket)
-                        .key(fileName)
-                        .contentType(file.getContentType())
-                        .build(),
-                RequestBody.fromBytes(file.getBytes())
-        );
+        try {
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
 
-        return "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + fileName;
+            s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(fileName)
+                            .contentType(file.getContentType())
+                            .build(),
+                    RequestBody.fromBytes(file.getBytes())
+            );
+
+
+
+            return "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + fileName;
+        }catch (Exception e){
+            throw new CustomException(ErrorCode.FILE_UPLOAD_FAILED);
+        }
+
     }
 
 
