@@ -14,11 +14,15 @@ import java.util.Optional;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long> {
+
+    int countByUserId(Long userId);
+
     @Query("SELECT b FROM Board b " +
             "LEFT JOIN  fetch  b.boardAddress " +
             "WHERE (:search IS NULL OR b.showName LIKE %:search% OR b.artistName LIKE %:search% OR b.title LIKE %:search% OR b.contents LIKE %:search%) " +
             "AND (:start IS NULL OR b.createdAt >= :start) " +
-            "AND (:end IS NULL OR b.createdAt <= :end)")
+            "AND (:end IS NULL OR b.createdAt <= :end) " +
+            "ORDER BY b.createdAt DESC ")
     Page<Board> searchBoards(
             @Param("search") String search,
             @Param("start") OffsetDateTime start,
@@ -44,7 +48,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 //    );
 
     @Query("SELECT b FROM Board b ORDER BY size(b.likes) DESC, b.createdAt DESC")
-    List<Board> findBoardsOfBest(Pageable pageable);
+    Page<Board> findBoardsOfBest(Pageable pageable);
 
     List<Board> findAllByUserId(Long userId);
 
@@ -69,5 +73,18 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
             "LIMIT 5",
             nativeQuery = true)
     List<String> findTopKeywords();
+
+    // 팔로잉한 사람들 글 가져오기
+    @Query("""
+        select b
+        from Board b
+        where b.user.id in (
+            select f.follower.id
+            from Follow f
+            where f.followee.id = :userId
+        )
+        order by b.createdAt desc
+    """)
+    Page<Board> findAllByFollowing(@Param("userId") Long userId, Pageable pageable );
 
 }

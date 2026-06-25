@@ -9,8 +9,10 @@ import hello.atfeelogbackend.domain.board.repository.BoardAddressRepository;
 import hello.atfeelogbackend.domain.board.repository.BoardCommentRepository;
 import hello.atfeelogbackend.domain.board.repository.BoardLikeRepository;
 import hello.atfeelogbackend.domain.board.repository.BoardRepository;
+import hello.atfeelogbackend.domain.follow.repository.FollowRepository;
 import hello.atfeelogbackend.domain.user.entity.User;
 import hello.atfeelogbackend.domain.user.service.UserService;
+import hello.atfeelogbackend.global.auth.CustomUserDetails;
 import hello.atfeelogbackend.global.exception.CustomException;
 import hello.atfeelogbackend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +38,8 @@ public class BoardService {
     private final BoardAddressRepository boardAddressRepository;
 
     private final UserService userService;
+
+    private final FollowRepository followRepository;
 
     @Transactional
     public Board save(CreateBoardInput createBoardInput, Long userId) {
@@ -51,6 +54,7 @@ public class BoardService {
                         .showName(createBoardInput.getShowName())
                         .contents(createBoardInput.getContents())
                         .showDate(createBoardInput.getShowDate())
+                        .images(createBoardInput.getImages())
                         .build()
         );
 
@@ -74,6 +78,10 @@ public class BoardService {
 
     public Board findById(Long id) {
         return boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("NO DATA FOUND"));
+    }
+
+    public boolean isLiked(Long id, Long userId) {
+        return boardLikeRepository.existsByBoardIdAndUserId(id, userId);
     }
 
     public List<String> findTopKeyword(){
@@ -104,17 +112,55 @@ public class BoardService {
         return id;
     }
 
-    public List<FetchBoardResponse> fetchBoards(OffsetDateTime start, OffsetDateTime end, String search, Integer page) {
+    public List<BoardSummaryResponse> fetchBoards(OffsetDateTime start, OffsetDateTime end, String search, Integer page, CustomUserDetails customUserDetails) {
         Pageable pageable = PageRequest.of(page != null ? page - 1 : 0, 10,
                 Sort.by("createdAt").descending());
 
-        List<Board> temp = boardRepository.searchBoards(search, start, end, pageable).getContent();
-        List<FetchBoardResponse> fetchBoardResponses = new ArrayList<>();
-        for (Board board : temp) {
-            fetchBoardResponses.add(new FetchBoardResponse(board));
+        List<Board> boards = boardRepository
+                .searchBoards(search, start, end, pageable)
+                .getContent();
+
+        List<Long> boardIds = boards.stream()
+                .map(Board::getId)
+                .toList();
+
+        Map<Long, Integer> commentCountMap = boardCommentRepository
+                .countByBoardIds(boardIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> ((Long) row[1]).intValue()
+                ));
+
+        Map<Long, Integer> likeCountMap = boardLikeRepository
+                .countByBoardIds(boardIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> ((Long) row[1]).intValue()
+                ));
+
+        Set<Long> likedBoardIds = Set.of();
+
+        if (customUserDetails != null && !boardIds.isEmpty()) {
+            likedBoardIds = new HashSet<>(
+                    boardLikeRepository.findLikedBoardIds(
+                            customUserDetails.getUserId(),
+                            boardIds
+                    )
+            );
         }
 
-        return fetchBoardResponses;
+        Set<Long> finalLikedBoardIds = likedBoardIds;
+
+        return boards.stream()
+                .map(board -> new BoardSummaryResponse(
+                        board,
+                        commentCountMap.getOrDefault(board.getId(), 0),
+                        likeCountMap.getOrDefault(board.getId(), 0),
+                        finalLikedBoardIds.contains(board.getId())
+                ))
+                .toList();
     }
 
     public int fetchBoardsCount(OffsetDateTime start, OffsetDateTime end, String search) {
@@ -133,7 +179,7 @@ public class BoardService {
 
     public int fetchBoardOfMineCount(Long userId){
         List<Board> boards = boardRepository.findAllByUserId(userId);
-        return boards.size();
+        return boardRepository.countByUserId(userId);
     }
 
     public List<FetchBoardsLikeResponse> fetchBoardsLike(Long userId){
@@ -147,10 +193,19 @@ public class BoardService {
         return fetchBoardsLikeResponses;
     }
 
-    public List<FetchBoardResponse> fetchBoardsOfBest(){
+    public int fetchBoardsLikeCount(Long boardId){
+        return boardLikeRepository.countByBoardId(boardId);
+    }
+
+    public List<FetchBoardResponse> fetchBoardsOfBest(Boolean isTop5, Integer page){
+
         Pageable pageable = PageRequest.of(0, 5);
 
-        List<Board> boards = boardRepository.findBoardsOfBest(pageable);
+        if(!isTop5) {
+            pageable = PageRequest.of(page != null ? page - 1 : 0, 10);
+        }
+
+        List<Board> boards = boardRepository.findBoardsOfBest(pageable).getContent();
 
         List<FetchBoardResponse> fetchBoardResponses = new ArrayList<>();
         for (Board board : boards) {
@@ -215,4 +270,6 @@ public class BoardService {
 
         return new CommentDto(comment);
     }
+
+
 }

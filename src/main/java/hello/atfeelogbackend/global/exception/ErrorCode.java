@@ -26,7 +26,10 @@ public enum ErrorCode {
 
     // File
     FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
-    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 파일 형식입니다.");
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 파일 형식입니다."),
+
+    // Follow
+    FOLLOW_BY_SELF(HttpStatus.BAD_REQUEST, "자기 자신을 팔로우 할 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

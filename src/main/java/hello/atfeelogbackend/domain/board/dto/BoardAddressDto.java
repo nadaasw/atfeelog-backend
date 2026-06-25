@@ -1,11 +1,9 @@
 package hello.atfeelogbackend.domain.board.dto;
 
 import hello.atfeelogbackend.domain.board.entity.BoardAddress;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Getter

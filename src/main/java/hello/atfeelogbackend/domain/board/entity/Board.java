@@ -52,7 +52,7 @@ public class Board {
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardLike> likes = new ArrayList<>();
 
-    @OneToOne(mappedBy = "board")
+    @OneToOne(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private BoardAddress boardAddress;
 
     @ElementCollection

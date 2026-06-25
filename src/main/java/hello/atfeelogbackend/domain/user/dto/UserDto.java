@@ -1,10 +1,13 @@
 package hello.atfeelogbackend.domain.user.dto;
 
 import hello.atfeelogbackend.domain.user.entity.User;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
+@Getter
+@Setter
 public class UserDto {
     private Long id;
     private String email;

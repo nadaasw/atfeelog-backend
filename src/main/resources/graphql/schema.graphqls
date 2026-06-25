@@ -58,6 +58,12 @@ type FileManager{
   updatedAt: DateTime!
   deletedAt: DateTime
 }
+type Follow{
+  id: ID!
+  follower: [User]
+  following: [User]
+  createdAt: DateTime!
+}
 
 type Query {
   fetchBoard(boardId: ID!): Board!
@@ -65,11 +71,26 @@ type Query {
   fetchBoardsCount(endDate: DateTime, startDate: DateTime, search: String): Int!
   fetchBoardsCountOfMine: Int!
   fetchBoardsOfMine: [Board!]!
+  fetchBoardsByUser(userId: ID!): [Board]
+  fetchBoardsCountByUser(userId: ID!): Int
   fetchBoardsLike: [Board!]!
-  fetchBoardsOfBest: [Board!]!
+  fetchBoardsLikeByUser(userId: ID!): [Board]
+  fetchBoardsLikeCount(boardId: ID!) : Int
+  fetchBoardsOfBest(isTop5: Boolean!, page: Int): [Board!]!
   fetchBoardsKeyword: [String!]!
   fetchBoardComments(page: Int, boardId: ID!): [BoardComment!]!
   fetchUserLoggedIn: User!
+
+
+  # 팔로우 기능
+  fetchFollowers(userId: ID!): [User]
+  fetchFollowersOfMine: [User]
+  fetchFollowingOfMine: [User]
+  fetchFollowings(userId: ID!): [User]
+  isConnected(followerId: ID!): Boolean!
+  fetchCountOfFollowers(userId: ID!): Int!
+  fetchCountOfFollowing(userId: ID!): Int!
+  fetchFollowingFeed(page: Int): [Board]
 }
 
 
@@ -81,7 +102,7 @@ type Mutation {
   likeBoard(boardId: ID!): Int!
 
   createBoardComment(createBoardCommentInput: CreateBoardCommentInput!, boardId: ID!): BoardComment!
-  deleteBoardComment(boardId: ID!): ID!
+  deleteBoardComment(commentId: ID!): ID!
   updateBoardComment(commentId: ID!, content: String!): BoardComment!
 
   # User mutation
@@ -92,6 +113,9 @@ type Mutation {
   updateUser(updateUserInput: UpdateUserInput!): User!
 
   restoreAccessToken: Token!
+
+  # 팔로우 기능
+  addFollow(followerId: ID!): Boolean
 
 }
 
