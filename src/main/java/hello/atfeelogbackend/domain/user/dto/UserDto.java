@@ -13,6 +13,7 @@ public class UserDto {
     private String email;
     private String name;
     private String picture;
+    private String description;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -21,6 +22,7 @@ public class UserDto {
         this.email = user.getEmail();
         this.name = user.getName();
         this.picture = user.getPicture();
+        this.description = user.getDescription();
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
     }

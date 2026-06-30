@@ -1,19 +1,4 @@
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: atfeelog-mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: "1234"
-      MYSQL_DATABASE: atfeelog
-    ports:
-      - "3306:3306"
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   redis:
     image: redis:7
     container_name: atfeelog-redis
@@ -21,20 +6,18 @@ services:
       - "6379:6379"
 
   app:
-    build: .
+    image: nadaa97/atfeelog-backend:latest
     container_name: atfeelog-app
     ports:
       - "8080:8080"
     env_file:
       - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/atfeelog?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: "1234"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db.pcsbfbstuewcnzufsxod.supabase.co:5432/postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
     depends_on:
-      mysql:
-        condition: service_healthy
       redis:
         condition: service_started

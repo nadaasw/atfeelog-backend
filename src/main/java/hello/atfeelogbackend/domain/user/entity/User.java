@@ -46,6 +46,8 @@ public class User {
 
     private String picture;
 
+    private String description;
+
     @CreatedDate
     private OffsetDateTime createdAt;
 
@@ -59,9 +61,10 @@ public class User {
         this.picture = picture;
     }
 
-    public void update(String name, String password, String picture){
+    public void update(String name, String password, String picture, String description){
         if(name != null) this.name = name;
         if(password != null) this.password = password;
         if(picture != null) this.picture = picture;
+        if(description != null) this.description = description;
     }
 }

@@ -39,7 +39,7 @@ public class UserService {
             User user = findById(id);
             String encodedPassword = updateUserInput.getPassword() != null
                     ? bCryptPasswordEncoder.encode(updateUserInput.getPassword()) : null;
-            user.update(updateUserInput.getName(), encodedPassword, updateUserInput.getPicture());
+            user.update(updateUserInput.getName(), encodedPassword, updateUserInput.getPicture(), updateUserInput.getDescription());
             return user;
         }catch (Exception e){
             throw new CustomException(ErrorCode.USER_UPDATE_ERROR);

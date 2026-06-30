@@ -114,7 +114,7 @@ public class UserResolver {
             Long userId = principal.getUserId();
 
 
-            UpdateUserInput input = new UpdateUserInput(null, password, null);
+            UpdateUserInput input = new UpdateUserInput(null, password, null, null);
             userService.updateUser(input, userId);
             return true;
         }catch (Exception e){
