@@ -16,6 +16,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db.pcsbfbstuewcnzufsxod.supabase.co:5432/postgres?sslmode=require
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
     depends_on:
