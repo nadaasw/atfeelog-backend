@@ -86,5 +86,5 @@ jobs:
             AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             EOF
-            docker compose pull app
-            docker compose up -d
+            docker-compose pull app
+            docker-compose up -d
