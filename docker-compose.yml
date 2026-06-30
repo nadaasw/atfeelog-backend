@@ -24,6 +24,8 @@ services:
       CLOUD_AWS_CREDENTIALS_SECRET_KEY: ${AWS_SECRET_KEY}
       CLOUD_AWS_REGION_STATIC: ap-northeast-2
       CLOUD_AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+      SPRING_GRAPHQL_GRAPHIQL_ENABLED: "true"
+      SPRING_GRAPHQL_PATH: /graphql
     depends_on:
       redis:
         condition: service_started
