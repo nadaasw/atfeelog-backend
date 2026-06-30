@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .sessionManagement(AbstractHttpConfigurer::disable)
                 .addFilterBefore(tokenAuthenticationFilter(), BasicAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/graphql", "/graphiql/**", "/api/upload").permitAll()
+                .requestMatchers("/graphql", "/graphiql", "/graphiql/**", "/api/upload").permitAll()
                 .anyRequest().authenticated()
             );
 
