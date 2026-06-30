@@ -13,7 +13,7 @@ services:
     env_file:
       - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db.pcsbfbstuewcnzufsxod.supabase.co:5432/postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db.pcsbfbstuewcnzufsxod.supabase.co:5432/postgres?sslmode=require
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SPRING_DATA_REDIS_HOST: redis
