@@ -4,6 +4,8 @@ import hello.atfeelogbackend.domain.user.dto.CreateUserInput;
 import hello.atfeelogbackend.domain.user.dto.LoginRequest;
 import hello.atfeelogbackend.domain.user.dto.UpdateUserInput;
 import hello.atfeelogbackend.domain.user.entity.User;
+import hello.atfeelogbackend.domain.user.entity.UserPerformanceSubscription;
+import hello.atfeelogbackend.domain.user.repository.UserPerformanceSubscriptionRepository;
 import hello.atfeelogbackend.domain.user.repository.UserRepository;
 import hello.atfeelogbackend.global.exception.CustomException;
 import hello.atfeelogbackend.global.exception.ErrorCode;
@@ -12,11 +14,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserPerformanceSubscriptionRepository userPerformanceSubscriptionRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
@@ -61,4 +67,46 @@ public class UserService {
         return bCryptPasswordEncoder.matches(password, user.getPassword());
     }
 
+    @Transactional
+    public boolean togglePerformanceSubscription(String mt20id, Long userId) {
+        User user = findById(userId);
+
+        UserPerformanceSubscription subscription = userPerformanceSubscriptionRepository.findByUserAndMt20id(user, mt20id)
+                .orElse(null);
+
+        if(subscription == null){
+            UserPerformanceSubscription newSubscription = UserPerformanceSubscription.builder()
+                    .user(user)
+                    .mt20id(mt20id)
+                    .build();
+            userPerformanceSubscriptionRepository.save(newSubscription);
+            return true;
+        }
+
+
+        userPerformanceSubscriptionRepository.delete(subscription);
+
+        return false;
+    }
+
+    public List<String> fetchSubscribedPerformances(Long userId) {
+        User user = findById(userId);
+
+        List<UserPerformanceSubscription> subscriptions = userPerformanceSubscriptionRepository.findAllByUser(user)
+                .orElse(null);
+
+        if(subscriptions == null){
+            return new ArrayList<>();
+        }
+
+        List<String> result = new ArrayList<>();
+
+        for(UserPerformanceSubscription sub:subscriptions){
+            result.add(sub.getMt20id());
+        }
+
+        return result;
+
+
+    }
 }

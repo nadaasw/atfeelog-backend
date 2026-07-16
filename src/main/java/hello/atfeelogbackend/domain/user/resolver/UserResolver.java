@@ -30,6 +30,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.security.Principal;
 import java.time.Duration;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -155,5 +156,19 @@ public class UserResolver {
 
         String newToken = tokenService.createNewAccessToken(refreshToken);
         return new TokenDto(newToken);
+    }
+
+    @MutationMapping
+    @PreAuthorize("isAuthenticated()")
+    public boolean togglePerformanceSubscription(@Argument String mt20id, @AuthenticationPrincipal CustomUserDetails userDetails){
+        Long userId = userDetails.getUserId();
+        return userService.togglePerformanceSubscription(mt20id, userId);
+    }
+
+    @QueryMapping
+    @PreAuthorize("isAuthenticated()")
+    public List<String> fetchSubscribedPerformances(@AuthenticationPrincipal CustomUserDetails userDetails){
+        Long userId = userDetails.getUserId();
+        return userService.fetchSubscribedPerformances(userId);
     }
 }
