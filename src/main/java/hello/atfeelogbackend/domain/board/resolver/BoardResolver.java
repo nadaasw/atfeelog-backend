@@ -47,6 +47,11 @@ public class BoardResolver {
     }
 
     @QueryMapping
+    public List<FetchBoardResponse> fetchBoardByMt20id(@Argument String mt20id, @Argument Integer page){
+        return boardService.fetchBoardsByMy20id(mt20id, page);
+    }
+
+    @QueryMapping
     public List<BoardSummaryResponse> fetchBoards(@Argument OffsetDateTime endDate,
                                                 @Argument OffsetDateTime startDate,
                                                 @Argument String search,

@@ -23,6 +23,9 @@ public class FetchBoardResponse {
     private int commentCount;
     private int likeCount;
     private boolean isLiked = false;
+    private String mt20id;
+    private String posterUrl;
+    private String genre;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -38,6 +41,9 @@ public class FetchBoardResponse {
         this.images = boar.getImages();
         this.commentCount = boar.getComments() == null ? 0 : boar.getComments().size();
         this.likeCount = boar.getLikes() == null ? 0 : boar.getLikes().size();
+        this.mt20id = boar.getMt20id();
+        this.posterUrl = boar.getPosterUrl();
+        this.genre = boar.getGenre();
         this.createdAt = boar.getCreatedAt();
         this.updatedAt = boar.getUpdatedAt();
     }
@@ -55,6 +61,9 @@ public class FetchBoardResponse {
         this.images = boar.getImages();
         this.commentCount = boar.getComments() == null ? 0 : boar.getComments().size();
         this.likeCount = boar.getLikes() == null ? 0 : boar.getLikes().size();
+        this.mt20id = boar.getMt20id();
+        this.posterUrl = boar.getPosterUrl();
+        this.genre = boar.getGenre();
         this.createdAt = boar.getCreatedAt();
         this.updatedAt = boar.getUpdatedAt();
         this.isLiked = isLiked;

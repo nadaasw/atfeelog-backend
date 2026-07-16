@@ -30,6 +30,11 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
             Pageable pageable
     );
 
+    @Query("SELECT b FROM  Board b " +
+            "JOIN fetch b.user " +
+            "where b.mt20id = :mt20id " +
+            "order by b.createdAt DESC ")
+    Page<Board> getBoardsByMy20id(String mt20id, Pageable pageable);
 //    @Query(value = "SELECT b FROM Board b " +
 //            "JOIN FETCH b.user " +
 //            "LEFT JOIN FETCH b.boardAddress " +

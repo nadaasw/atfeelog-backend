@@ -55,6 +55,9 @@ public class BoardService {
                         .contents(createBoardInput.getContents())
                         .showDate(createBoardInput.getShowDate())
                         .images(createBoardInput.getImages())
+                        .mt20id(createBoardInput.getMt20id())
+                        .posterUrl(createBoardInput.getPosterUrl())
+                        .genre(createBoardInput.getGenre())
                         .build()
         );
 
@@ -98,7 +101,15 @@ public class BoardService {
             boardAddress.update(boardAddressInput.getPlaceName(), boardAddressInput.getJibunAddress(), boardAddressInput.getRoadAddress(), boardAddressInput.getX(), boardAddressInput.getY());
         }
 
-        board.update(updateBoardInput.getTitle(), updateBoardInput.getArtistName(), updateBoardInput.getShowName(), updateBoardInput.getContents(), updateBoardInput.getImages(), updateBoardInput.getShowDate());
+        board.update(updateBoardInput.getTitle(),
+                updateBoardInput.getArtistName(),
+                updateBoardInput.getShowName(),
+                updateBoardInput.getContents(),
+                updateBoardInput.getImages(),
+                updateBoardInput.getShowDate(),
+                updateBoardInput.getMt20id(),
+                updateBoardInput.getPosterUrl(),
+                updateBoardInput.getGenre());
 
         return board;
     }
@@ -110,6 +121,16 @@ public class BoardService {
         }
         boardRepository.deleteById(id);
         return id;
+    }
+    public List<FetchBoardResponse> fetchBoardsByMy20id(String mt20id, Integer page) {
+        Pageable pageable = PageRequest.of(page != null ? page -1 : 0, 10, Sort.by("createdAt").descending());
+
+        List<Board> boards = boardRepository
+                .getBoardsByMy20id(mt20id, pageable)
+                .getContent();
+
+
+        return boards.stream().map(FetchBoardResponse::new).toList();
     }
 
     public List<BoardSummaryResponse> fetchBoards(OffsetDateTime start, OffsetDateTime end, String search, Integer page, CustomUserDetails customUserDetails) {
@@ -270,6 +291,7 @@ public class BoardService {
 
         return new CommentDto(comment);
     }
+
 
 
 }

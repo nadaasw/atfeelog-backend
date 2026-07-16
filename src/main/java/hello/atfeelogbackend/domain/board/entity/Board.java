@@ -4,6 +4,7 @@ import hello.atfeelogbackend.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -58,6 +59,16 @@ public class Board {
     @ElementCollection
     private List<String> images = new ArrayList<>();
 
+    @Column(name = "mt20id", length = 20)
+    private String mt20id;
+
+    @Lob
+    @Column(name = "poster_url")
+    private String posterUrl;
+
+    @Column(name = "genre", length = 50)
+    private String genre;
+
     @CreatedDate
     private OffsetDateTime createdAt;
 
@@ -74,12 +85,15 @@ public class Board {
         this.showDate = showDate;
     }
 
-    public void update(String title, String artistName, String showName, String contents, List<String> images, OffsetDateTime showDate) {
+    public void update(String title, String artistName, String showName, String contents, List<String> images, OffsetDateTime showDate, String mt20id, String posterUrl, String genre) {
         if(title != null) this.title = title;
         if(artistName != null) this.artistName = artistName;
         if(showName != null) this.showName = showName;
         if(contents != null) this.contents = contents;
         if(images != null) this.images = images;
         if(showDate != null) this.showDate = showDate;
+        if(mt20id != null) this.mt20id = mt20id;
+        if(posterUrl != null) this.posterUrl = posterUrl;
+        if(genre != null) this.genre = genre;
     }
 }

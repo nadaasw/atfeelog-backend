@@ -17,4 +17,7 @@ public class CreateBoardInput {
     private OffsetDateTime showDate;
     private BoardAddressInput boardAddressInput;
     private List<String> images;
+    private String mt20id;
+    private String posterUrl;
+    private String genre;
 }
