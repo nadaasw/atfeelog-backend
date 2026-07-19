@@ -62,8 +62,7 @@ public class Board {
     @Column(name = "mt20id", length = 20)
     private String mt20id;
 
-    @Lob
-    @Column(name = "poster_url")
+    @Column(name = "poster_url", columnDefinition = "TEXT")
     private String posterUrl;
 
     @Column(name = "genre", length = 50)
