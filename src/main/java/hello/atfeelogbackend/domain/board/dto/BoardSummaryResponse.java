@@ -21,6 +21,9 @@ public class BoardSummaryResponse {
     private int commentCount;
     private int likeCount;
     private boolean isLiked;
+    private String mt20id;
+    private String posterUrl;
+    private String genre;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -44,6 +47,9 @@ public class BoardSummaryResponse {
         this.commentCount = commentCount;
         this.likeCount = likeCount;
         this.isLiked = isLiked;
+        this.mt20id = board.getMt20id();
+        this.posterUrl = board.getPosterUrl();
+        this.genre = board.getGenre();
         this.createdAt = board.getCreatedAt();
         this.updatedAt = board.getUpdatedAt();
     }
