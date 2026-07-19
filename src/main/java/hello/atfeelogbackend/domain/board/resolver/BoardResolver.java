@@ -30,7 +30,6 @@ public class BoardResolver {
     @MutationMapping
     public FetchBoardResponse createBoard(@Argument CreateBoardInput createBoardInput, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        log.info(createBoardInput.getImages().toString());
         return new  FetchBoardResponse(boardService.save(createBoardInput, customUserDetails.getUserId()));
     }
 
@@ -47,8 +46,9 @@ public class BoardResolver {
     }
 
     @QueryMapping
-    public List<FetchBoardResponse> fetchBoardByMt20id(@Argument String mt20id, @Argument Integer page){
-        return boardService.fetchBoardsByMy20id(mt20id, page);
+    public List<BoardSummaryResponse> fetchBoardsByMt20id(@Argument String mt20id, @Argument Integer page, @AuthenticationPrincipal CustomUserDetails userDetails){
+        Long userId = userDetails != null ? userDetails.getUserId() : null;
+        return boardService.fetchBoardsByMy20id(mt20id, page, userId);
     }
 
     @QueryMapping
