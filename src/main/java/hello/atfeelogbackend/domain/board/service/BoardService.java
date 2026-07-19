@@ -122,15 +122,51 @@ public class BoardService {
         boardRepository.deleteById(id);
         return id;
     }
-    public List<FetchBoardResponse> fetchBoardsByMy20id(String mt20id, Integer page) {
+    public List<BoardSummaryResponse> fetchBoardsByMt20id(String mt20id, Integer page, Long userId) {
         Pageable pageable = PageRequest.of(page != null ? page -1 : 0, 10, Sort.by("createdAt").descending());
 
         List<Board> boards = boardRepository
                 .getBoardsByMy20id(mt20id, pageable)
                 .getContent();
 
+        List<Long> boardIds = boards.stream()
+                .map(Board::getId)
+                .toList();
 
-        return boards.stream().map(FetchBoardResponse::new).toList();
+        Map<Long, Integer> commentCountMap = boardCommentRepository
+                .countByBoardIds(boardIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> ((Long) row[1]).intValue()
+                ));
+
+        Map<Long, Integer> likeCountMap = boardLikeRepository
+                .countByBoardIds(boardIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> ((Long) row[1]).intValue()
+                ));
+
+        Set<Long> likedBoardIds = Set.of();
+
+        if (userId != null && !boardIds.isEmpty()) {
+            likedBoardIds = new HashSet<>(
+                    boardLikeRepository.findLikedBoardIds(userId, boardIds)
+            );
+        }
+
+        Set<Long> finalLikedBoardIds = likedBoardIds;
+
+        return boards.stream()
+                .map(board -> new BoardSummaryResponse(
+                        board,
+                        commentCountMap.getOrDefault(board.getId(), 0),
+                        likeCountMap.getOrDefault(board.getId(), 0),
+                        finalLikedBoardIds.contains(board.getId())
+                ))
+                .toList();
     }
 
     public List<BoardSummaryResponse> fetchBoards(OffsetDateTime start, OffsetDateTime end, String search, Integer page, CustomUserDetails customUserDetails) {
