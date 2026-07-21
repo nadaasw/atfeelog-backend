@@ -16,6 +16,7 @@ import hello.atfeelogbackend.global.exception.ErrorCode;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -81,7 +82,7 @@ public class UserResolver {
     }
 
     @MutationMapping
-    public UserDto createUser(@Argument CreateUserInput createUserInput){
+    public UserDto createUser(@Argument @Valid CreateUserInput createUserInput){
 
         User user = userService.createUser(createUserInput);
 
