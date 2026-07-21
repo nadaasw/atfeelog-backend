@@ -55,7 +55,7 @@ public class UserService {
 
 
     public User findById(Long id){
-        return userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return userRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
     public User findByEmail(String email){
