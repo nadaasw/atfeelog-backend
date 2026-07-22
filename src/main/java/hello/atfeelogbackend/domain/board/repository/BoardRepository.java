@@ -20,13 +20,13 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     @Query(value = "SELECT b FROM Board b " +
             "LEFT JOIN  fetch  b.boardAddress " +
             "WHERE (:search IS NULL OR b.showName LIKE %:search% OR b.artistName LIKE %:search% OR b.title LIKE %:search% OR b.contents LIKE %:search%) " +
-            "AND (:start IS NULL OR b.createdAt >= :start) " +
-            "AND (:end IS NULL OR b.createdAt <= :end) " +
+            "AND b.createdAt >= COALESCE(:start, b.createdAt) " +
+            "AND b.createdAt <= COALESCE(:end, b.createdAt) " +
             "ORDER BY b.createdAt DESC ",
             countQuery = "SELECT COUNT(b) FROM Board b " +
                     "WHERE (:search IS NULL OR b.showName LIKE %:search% OR b.artistName LIKE %:search% OR b.title LIKE %:search% OR b.contents LIKE %:search%) " +
-                    "AND (:start IS NULL OR b.createdAt >= :start) " +
-                    "AND (:end IS NULL OR b.createdAt <= :end)")
+                    "AND b.createdAt >= COALESCE(:start, b.createdAt) " +
+                    "AND b.createdAt <= COALESCE(:end, b.createdAt)")
     Page<Board> searchBoards(
             @Param("search") String search,
             @Param("start") OffsetDateTime start,
