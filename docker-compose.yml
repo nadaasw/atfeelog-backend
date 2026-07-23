@@ -32,6 +32,8 @@ services:
       CLOUD_AWS_S3_BUCKET: ${AWS_S3_BUCKET}
       SPRING_GRAPHQL_GRAPHIQL_ENABLED: "true"
       SPRING_GRAPHQL_PATH: /graphql
+      SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: 10MB
+      SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: 10MB
     depends_on:
       redis:
         condition: service_started
