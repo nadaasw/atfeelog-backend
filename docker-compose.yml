@@ -2,17 +2,22 @@ services:
   redis:
     image: redis:7
     container_name: atfeelog-redis
+    restart: unless-stopped
+    mem_limit: 100m
     ports:
       - "6379:6379"
 
   app:
     image: nadaa97/atfeelog-backend:latest
     container_name: atfeelog-app
+    restart: unless-stopped
+    mem_limit: 700m
     ports:
       - "8080:8080"
     env_file:
       - .env
     environment:
+      JAVA_TOOL_OPTIONS: "-Xmx450m -XX:MaxMetaspaceSize=150m"
       SPRING_DATASOURCE_URL: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require
       SPRING_DATASOURCE_USERNAME: postgres.pcsbfbstuewcnzufsxod
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
