@@ -80,7 +80,7 @@ public class BoardService {
     }
 
     public Board findById(Long id) {
-        return boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("NO DATA FOUND"));
+        return boardRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.BOARD_NOT_FOUND));
     }
 
     public boolean isLiked(Long id, Long userId) {
@@ -93,7 +93,7 @@ public class BoardService {
 
     @Transactional
     public Board update(Long boardId, UpdateBoardInput updateBoardInput) {
-        Board board = boardRepository.findById(boardId).orElseThrow(() -> new IllegalArgumentException("NO DATA FOUND"));
+        Board board = boardRepository.findById(boardId).orElseThrow(() -> new CustomException(ErrorCode.BOARD_NOT_FOUND));
 
         if(updateBoardInput.getBoardAddressInput() != null) {
             BoardAddress boardAddress = boardAddressRepository.findByBoard(board);
@@ -117,7 +117,7 @@ public class BoardService {
     public Long delete(Long id, Long userId) {
         Board board = findById(id);
         if(!board.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("권한이 없는 요청입니다.");
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
         boardRepository.deleteById(id);
         return id;
@@ -308,9 +308,9 @@ public class BoardService {
     }
 
     public Long deleteComment(Long commentId, Long userId) {
-        BoardComment comment = boardCommentRepository.findById(commentId).orElseThrow(() -> new IllegalArgumentException("NO DATA FOUND"));
+        BoardComment comment = boardCommentRepository.findById(commentId).orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
         if(!comment.getUser().getId().equals(userId)) {
-            throw new CustomException(ErrorCode.BOARD_NOT_FOUND);
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
         boardCommentRepository.delete(comment);
         return commentId;
@@ -319,7 +319,7 @@ public class BoardService {
 
     @Transactional
     public CommentDto updateComment(Long commentId, String content, Long userId) {
-        BoardComment comment = boardCommentRepository.findById(commentId).orElseThrow(() -> new IllegalArgumentException("NO DATA FOUND"));
+        BoardComment comment = boardCommentRepository.findById(commentId).orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
         if(!comment.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.ACCESS_DENIED);
         }

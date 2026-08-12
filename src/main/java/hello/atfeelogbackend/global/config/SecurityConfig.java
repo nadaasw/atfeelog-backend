@@ -1,6 +1,8 @@
 package hello.atfeelogbackend.global.config;
 
 import hello.atfeelogbackend.global.auth.TokenProvider;
+import hello.atfeelogbackend.global.exception.CustomAccessDeniedHandler;
+import hello.atfeelogbackend.global.exception.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +28,8 @@ import java.util.List;
 public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -35,8 +39,12 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(AbstractHttpConfigurer::disable)
                 .addFilterBefore(tokenAuthenticationFilter(), BasicAuthenticationFilter.class)
+                .exceptionHandling(handler -> handler
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/graphql", "/graphiql", "/graphiql/**", "/api/upload").permitAll()
+                .requestMatchers("/graphql", "/graphiql", "/graphiql/**").permitAll()
                 .anyRequest().authenticated()
             );
 

@@ -91,13 +91,14 @@ public class UserResolver {
 
 
     @MutationMapping
-    public boolean logoutUser(@AuthenticationPrincipal CustomUserDetails principal, HttpServletRequest request) {
+    public boolean logoutUser(@AuthenticationPrincipal CustomUserDetails principal) {
         try{
             Long userId = principal.getUserId();
 
             // RequestContextHolder에서 꺼내기
-            HttpServletResponse response = ((ServletRequestAttributes)
-                    RequestContextHolder.currentRequestAttributes()).getResponse();
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+            HttpServletRequest request = attributes.getRequest();
+            HttpServletResponse response = attributes.getResponse();
 
             RefreshToken refreshToken = refreshTokenService.findByUserId(userId);
             refreshTokenService.delete(refreshToken);

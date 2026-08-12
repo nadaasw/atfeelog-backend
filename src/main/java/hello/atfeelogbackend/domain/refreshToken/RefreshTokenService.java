@@ -1,5 +1,7 @@
 package hello.atfeelogbackend.domain.refreshToken;
 
+import hello.atfeelogbackend.global.exception.CustomException;
+import hello.atfeelogbackend.global.exception.ErrorCode;
 import hello.atfeelogbackend.global.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,11 +24,11 @@ public class RefreshTokenService {
     }
 
     public RefreshToken findByRefreshToken(String refreshToken) {
-        return refreshTokenRepository.findByRefreshToken(refreshToken).orElseThrow(() -> new IllegalArgumentException("No refresh token found"));
+        return refreshTokenRepository.findByRefreshToken(refreshToken).orElseThrow(() -> new CustomException(ErrorCode.TOKEN_NOT_FOUND));
     }
 
     public RefreshToken findByUserId(Long userId) {
-        return refreshTokenRepository.findByUserId(userId).orElseThrow(()-> new IllegalArgumentException("No User data"));
+        return refreshTokenRepository.findByUserId(userId).orElseThrow(() -> new CustomException(ErrorCode.TOKEN_NOT_FOUND));
     }
 
     public boolean existsByUserId(Long userId) {

@@ -42,7 +42,7 @@ public class Board {
     @Column(name = "show_date")
     private OffsetDateTime showDate;
 
-    @Column(name = "contents", nullable = false)
+    @Column(name = "contents", nullable = false, columnDefinition = "TEXT")
     private String contents;
 
     @BatchSize(size = 100)

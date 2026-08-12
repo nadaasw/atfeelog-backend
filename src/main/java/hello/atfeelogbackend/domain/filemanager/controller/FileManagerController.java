@@ -26,5 +26,6 @@ public class FileManagerController {
         String url = fileManagerService.upload(file);
         log.info("Upload url: {}", url);
         return ResponseEntity.ok(Map.of("url", url));
+
     }
 }

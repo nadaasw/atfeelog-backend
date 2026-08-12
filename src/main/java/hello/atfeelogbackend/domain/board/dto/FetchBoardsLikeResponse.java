@@ -34,7 +34,7 @@ public class FetchBoardsLikeResponse {
         this.showName = board.getShowName();
         this.showDate = board.getShowDate();
         this.contents = board.getContents();
-        this.boardAddress = new BoardAddressDto(board.getBoardAddress());
+        this.boardAddress = board.getBoardAddress() != null ? new BoardAddressDto(board.getBoardAddress()) : null;
         this.isLiked = isLiked;
         this.images = board.getImages();
         this.commentCount = board.getComments().size();

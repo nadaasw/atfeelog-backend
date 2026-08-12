@@ -13,7 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Slf4j
+@Slf4j(topic = "Security")
 @RequiredArgsConstructor
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
@@ -32,9 +32,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             Authentication auth = tokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
             log.info("[TokenFilter] 인증 성공 - principal={}", auth.getPrincipal());
-        } else {
-            log.warn("[TokenFilter] 인증 실패 - token={}, valid={}", token, token != null && tokenProvider.validateToken(token));
         }
+
         filterChain.doFilter(request, response);
     }
 
@@ -46,4 +45,6 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
+
+
 }

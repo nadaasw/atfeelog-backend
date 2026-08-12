@@ -22,7 +22,7 @@ public class TokenService {
 
     public String createNewAccessToken(String refreshToken) {
         if(!tokenProvider.validateToken(refreshToken)) {
-            throw new IllegalArgumentException("Invalid refresh token");
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
 
         Long userId = refreshTokenService.findByRefreshToken(refreshToken).getUserId();

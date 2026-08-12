@@ -10,6 +10,7 @@ public enum ErrorCode {
 
     // Board
     BOARD_NOT_FOUND(HttpStatus.NOT_FOUND, "Board Not Found"),
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Comment Not Found"),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access Denied"),
 
 
