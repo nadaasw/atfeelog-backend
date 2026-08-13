@@ -27,6 +27,17 @@ public class UserService {
 
 
     public User createUser(CreateUserInput createUserInput) {
+        // 이메일 중복체크
+        if(validateDuplicateEmail(createUserInput.getEmail())){
+            throw new CustomException(ErrorCode.DUPLICATED_ID);
+        }
+
+
+        // 닉네임 중복체크
+        if(validateDuplicateName(createUserInput.getName())){
+            throw new CustomException(ErrorCode.DUPLICATED_NAME);
+        }
+
         User user = User.builder()
                 .email(createUserInput.getEmail())
                 .name(createUserInput.getName())
@@ -41,16 +52,16 @@ public class UserService {
 
     @Transactional
     public User updateUser(UpdateUserInput updateUserInput, Long id){
-        try{
-            User user = findById(id);
-            String encodedPassword = updateUserInput.getPassword() != null
-                    ? bCryptPasswordEncoder.encode(updateUserInput.getPassword()) : null;
-            user.update(updateUserInput.getName(), encodedPassword, updateUserInput.getPicture(), updateUserInput.getDescription());
-            return user;
-        }catch (Exception e){
-            throw new CustomException(ErrorCode.USER_UPDATE_ERROR);
+        User user = findById(id);
+        String encodedPassword = updateUserInput.getPassword() != null
+                ? bCryptPasswordEncoder.encode(updateUserInput.getPassword()) : null;
+        if(updateUserInput.getName() != null && validateDuplicateName(updateUserInput.getName())){
+            throw new CustomException(ErrorCode.DUPLICATED_NAME);
         }
 
+        user.update(updateUserInput.getName(), encodedPassword, updateUserInput.getPicture(), updateUserInput.getDescription());
+
+        return user;
     }
 
 
@@ -65,6 +76,12 @@ public class UserService {
     public boolean validateUser(String email, String password){
         User user = findByEmail(email);
         return bCryptPasswordEncoder.matches(password, user.getPassword());
+    }
+    public boolean validateDuplicateEmail(String email){
+        return userRepository.existsByEmail(email);
+    }
+    public boolean validateDuplicateName(String name){
+        return userRepository.existsByName(name);
     }
 
     @Transactional
