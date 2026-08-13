@@ -30,7 +30,9 @@ public enum ErrorCode {
     INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 파일 형식입니다."),
 
     // Follow
-    FOLLOW_BY_SELF(HttpStatus.BAD_REQUEST, "자기 자신을 팔로우 할 수 없습니다.");
+    FOLLOW_BY_SELF(HttpStatus.BAD_REQUEST, "자기 자신을 팔로우 할 수 없습니다."),
+    DUPLICATED_ID(HttpStatus.CONFLICT,"중복된 이메일입니다." ),
+    DUPLICATED_NAME(HttpStatus.CONFLICT,"중복된 닉네임입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
