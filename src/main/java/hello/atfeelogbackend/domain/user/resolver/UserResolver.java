@@ -45,6 +45,8 @@ public class UserResolver {
     private static final Duration ACCESS_TOKEN_DURATION = Duration.ofHours(1);
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
 
+    // Query
+
     @PreAuthorize("isAuthenticated()")
     @QueryMapping
     public User fetchUserLoggedIn(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
@@ -53,6 +55,14 @@ public class UserResolver {
         return userService.findById(userId);
     }
 
+    @QueryMapping
+    @PreAuthorize("isAuthenticated()")
+    public List<String> fetchSubscribedPerformances(@AuthenticationPrincipal CustomUserDetails userDetails){
+        Long userId = userDetails.getUserId();
+        return userService.fetchSubscribedPerformances(userId);
+    }
+
+    // Mutation
 
     @Transactional
     @MutationMapping
@@ -89,7 +99,7 @@ public class UserResolver {
         return new UserDto(user);
     }
 
-
+    @PreAuthorize("isAuthenticated()")
     @MutationMapping
     public boolean logoutUser(@AuthenticationPrincipal CustomUserDetails principal) {
         try{
@@ -111,6 +121,7 @@ public class UserResolver {
     }
 
     @Transactional
+    @PreAuthorize("isAuthenticated()")
     @MutationMapping
     public boolean resetUserPassword(@Argument String password, @AuthenticationPrincipal CustomUserDetails principal){
         try{
@@ -126,6 +137,7 @@ public class UserResolver {
     }
 
     @Transactional
+    @PreAuthorize("isAuthenticated()")
     @MutationMapping
     public User updateUser(@Argument UpdateUserInput updateUserInput, @AuthenticationPrincipal CustomUserDetails principal){
 
@@ -165,12 +177,5 @@ public class UserResolver {
     public boolean togglePerformanceSubscription(@Argument String mt20id, @AuthenticationPrincipal CustomUserDetails userDetails){
         Long userId = userDetails.getUserId();
         return userService.togglePerformanceSubscription(mt20id, userId);
-    }
-
-    @QueryMapping
-    @PreAuthorize("isAuthenticated()")
-    public List<String> fetchSubscribedPerformances(@AuthenticationPrincipal CustomUserDetails userDetails){
-        Long userId = userDetails.getUserId();
-        return userService.fetchSubscribedPerformances(userId);
     }
 }

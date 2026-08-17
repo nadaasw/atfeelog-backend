@@ -26,12 +26,7 @@ public class BoardResolver {
 
     private final BoardService boardService;
 
-    @PreAuthorize("isAuthenticated()")
-    @MutationMapping
-    public FetchBoardResponse createBoard(@Argument CreateBoardInput createBoardInput, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-
-        return new  FetchBoardResponse(boardService.save(createBoardInput, customUserDetails.getUserId()));
-    }
+    // Query
 
     @QueryMapping
     public FetchBoardResponse fetchBoard(@Argument Long boardId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
@@ -125,6 +120,15 @@ public class BoardResolver {
         return boardService.fetchBoardsOfBest(isTop5, page);
     }
 
+    // Mutation
+
+    @PreAuthorize("isAuthenticated()")
+    @MutationMapping
+    public FetchBoardResponse createBoard(@Argument CreateBoardInput createBoardInput, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        return new  FetchBoardResponse(boardService.save(createBoardInput, customUserDetails.getUserId()));
+    }
+
     @PreAuthorize("isAuthenticated()")
     @MutationMapping
     public FetchBoardResponse updateBoard(@Argument UpdateBoardInput updateBoardInput, @Argument Long boardId) {
@@ -162,7 +166,6 @@ public class BoardResolver {
         Long userId = userDetails.getUserId();
         return boardService.likeBoard(boardId, userId);
     }
-
 
     @PreAuthorize("isAuthenticated()")
     @MutationMapping

@@ -23,17 +23,7 @@ public class FollowResolver {
 
     private final FollowService followService;
 
-    @PreAuthorize("isAuthenticated()")
-    @MutationMapping
-    @Transactional
-    public Boolean addFollow(@Argument Long followerId, @AuthenticationPrincipal CustomUserDetails userDetails){
-        Long userId = userDetails.getUserId();
-
-        followService.follow(followerId, userId);
-
-        return true;
-    }
-
+    // Query
 
     @QueryMapping
     public List<UserDto> fetchFollowers(@Argument Long userId) {
@@ -64,12 +54,10 @@ public class FollowResolver {
         return followService.isFollowing(followerId, userDetails.getUserId());
     }
 
-
     @QueryMapping
     public Integer fetchCountOfFollowers(@Argument Long userId) {
         return followService.countFollowers(userId);
     }
-
 
     @QueryMapping
     public Integer fetchCountOfFollowing(@Argument Long userId) {
@@ -82,6 +70,19 @@ public class FollowResolver {
         Long userId = userDetails.getUserId();
 
         return followService.getFollowingFeed(userId, page);
+    }
+
+    // Mutation
+
+    @PreAuthorize("isAuthenticated()")
+    @MutationMapping
+    @Transactional
+    public Boolean addFollow(@Argument Long followerId, @AuthenticationPrincipal CustomUserDetails userDetails){
+        Long userId = userDetails.getUserId();
+
+        followService.follow(followerId, userId);
+
+        return true;
     }
 
 }
