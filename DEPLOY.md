@@ -18,9 +18,11 @@
 | 역할 | 서비스 |
 |------|--------|
 | Spring Boot 앱 | Oracle Cloud VM (1 CPU, 1GB RAM) |
+| 리버스 프록시 / TLS | Caddy — Oracle Cloud VM, Docker 컨테이너 (Let's Encrypt 자동 발급·갱신) |
 | Redis (캐시) | Oracle Cloud VM — Docker 컨테이너 |
 | PostgreSQL (DB) | Supabase 외부 서비스 (무료 티어) |
 | 이미지 저장소 | Docker Hub (`nadaa97/atfeelog-backend`) |
+| 도메인 | `api.atfeelog.site` → VM IP (A 레코드) |
 
 MySQL 대신 Supabase를 사용하는 이유: VM 메모리(1GB)가 MySQL + Redis + Spring을 동시에 올리기에 부족하기 때문.
 
@@ -90,6 +92,13 @@ sudo systemctl enable docker
 
 # 5. 레포 클론 (최초 1회)
 git clone https://github.com/nadaasw/atfeelog-backend.git ~/atfeelog-backend
+
+# 6. VM 방화벽(ufw) 설정 — OCI Security List와 별개의 2차 방어선
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw default deny incoming
+sudo ufw enable
 ```
 
 이후부터는 main에 push할 때마다 GitHub Actions가 자동 배포합니다.
@@ -128,7 +137,10 @@ OCI 콘솔 → VM → Networking 탭 → Subnet → Security List → Add Ingres
 | 포트 | 프로토콜 | Source CIDR | 용도 |
 |------|----------|-------------|------|
 | `22` | TCP | `0.0.0.0/0` | SSH (GitHub Actions 접속용) |
-| `8080` | TCP | `0.0.0.0/0` | Spring 앱 |
+| `80` | TCP | `0.0.0.0/0` | HTTP (Caddy, ACME 챌린지 + HTTPS 리다이렉트) |
+| `443` | TCP | `0.0.0.0/0` | HTTPS (Caddy, 실제 트래픽) |
+
+> `8080`은 더 이상 외부에 열지 않음. `docker-compose.yml`에서 `app` 컨테이너 포트를 `127.0.0.1:8080:8080`으로 바꿔 VM 로컬(=Caddy)에서만 접근 가능하도록 제한했고, Caddy가 `api.atfeelog.site` 요청을 받아 내부 도커망으로 `app:8080`에 프록시함. Redis(`6379`)도 호스트에 퍼블리시하지 않도록 변경 — 앱은 도커 내부망(`redis:6379`)으로만 접근.
 
 ---
 
@@ -200,6 +212,8 @@ Oracle Cloud VM은 IPv6으로 외부 접속이 안 됨. 공유 풀러(pooler) �
 
 추가로 확인은 안 했지만 잠재 위험 요소로 남겨둠: `SecurityConfig.java`에 `CorsConfiguration`/`CorsConfigurationSource` import는 되어있는데 실제 `.cors(...)` 설정이나 빈 등록이 전혀 없음 (CORS 미설정). 프론트가 API와 다른 origin에서 호출하는 구조라면 브라우저에서 요청이 막힐 수 있으니 나중에 필요하면 점검할 것.
 
+> **해결 완료 (2026-08-19)**: 아래 10번 항목에서 `corsConfigurationSource` 빈을 등록하고 `.cors(...)`를 필터 체인에 연결함.
+
 ### 8. 갑자기 502 — `app` 컨테이너가 OOM killed (2026-07-23)
 `docker inspect atfeelog-app`에서 `OOMKilled=true, ExitCode=137`. `dmesg`에도 `Out of memory: Killed process (java)` 기록 확인. 배포 때문이 아니라 런타임 중 리눅스 OOM killer가 자바 프로세스를 강제 종료한 것 — 컨테이너가 죽어있으니 앞단에서 502가 뜬 것. VM이 1GB RAM에 swap이 0B라서, JVM 힙에 상한이 없으면(`-Xmx` 미지정) 메모리 스파이크 시 스왑으로 버티지 못하고 바로 OOM kill로 직행함.
 
@@ -213,3 +227,21 @@ Oracle Cloud VM은 IPv6으로 외부 접속이 안 됨. 공유 풀러(pooler) �
 VM에서 8MB 파일로 직접 재현: `MaxUploadSizeExceededException: Maximum upload size exceeded` 로그 확인. 폰 사진(보통 2~10MB)은 대부분 이 1MB 한도에 걸려 실패하고, 프론트 프록시 쪽에서는 이게 504/`socket hang up`(ECONNRESET)으로 보임.
 
 대응: `docker-compose.yml`의 `app.environment`에 `SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE`, `SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE`를 명시적으로 추가. **교훈: `application.yml`이 gitignore되어 빌드에 포함되지 않는 구조이므로, `docker-compose.yml`의 environment가 실제 설정의 유일한 소스라는 걸 항상 전제하고 새 설정을 추가할 것.**
+
+### 10. 보안 강화 — 포트 정리 + HTTPS + CORS (2026-08-19)
+
+모니터링/시큐어 코딩 학습 중 발견한 문제들을 정리:
+
+- **포트 과다 개방**: OCI Security List에 SSH(22)와 Spring 앱(8080)이 `0.0.0.0/0`으로 열려 있었고, `docker-compose.yml`은 Redis(6379)까지 호스트에 불필요하게 퍼블리시하고 있었음 (앱은 이미 도커 내부망 `redis:6379`로 접근하므로 호스트 노출이 애초에 불필요).
+- **HTTPS 미적용**: 프론트가 `http://<VM IP>:8080`으로 직접 붙는 구조라 TLS 없이 평문 통신 중이었음.
+- **CORS 미설정**: 위 7번 항목 참고.
+
+대응:
+1. 도메인 구매(`api.atfeelog.site`) 후 A 레코드를 VM IP로 연결
+2. `docker-compose.yml`에 Caddy 서비스 추가 — `api.atfeelog.site` 요청을 받아 내부 도커망으로 `app:8080`에 프록시, Let's Encrypt 인증서 발급·자동 갱신 전담 (`Caddyfile` 참고)
+3. `app` 컨테이너 포트를 `127.0.0.1:8080:8080`으로 제한 (VM 로컬=Caddy만 접근 가능), `redis`는 호스트 포트 퍼블리시 자체를 제거
+4. OCI Security List: `8080` 제거, `80`/`443` 추가 (`22`는 GitHub Actions 배포용으로 유지)
+5. VM에 `ufw` 방화벽 추가 (22/80/443만 허용) — OCI 설정 실수 시 2차 방어선
+6. `SecurityConfig.java`에 `corsConfigurationSource` 빈 등록 (허용 origin: `https://at-feelog-fe.vercel.app`, `http://localhost:3000`) 및 HSTS 헤더 추가
+
+GraphiQL은 API 문서 조회 용도로 계속 켜두기로 결정, 이번 범위에서는 건드리지 않음 (추후 Caddy 단에서 `/graphiql` 경로만 basic auth로 잠그는 방식 고려 가능).
