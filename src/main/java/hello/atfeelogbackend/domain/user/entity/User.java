@@ -4,10 +4,7 @@ import hello.atfeelogbackend.domain.board.entity.Board;
 import hello.atfeelogbackend.domain.board.entity.BoardComment;
 import hello.atfeelogbackend.domain.board.entity.BoardLike;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -20,9 +17,7 @@ import java.util.List;
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
     @Id
@@ -39,10 +34,13 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<BoardLike> boardLikeList = new ArrayList<>();
 
+
+    @Column(unique = true, nullable = false)
     private String email;
 
     private String password;
 
+    @Column(unique = true, nullable = false)
     private String name;
 
     private String picture;
@@ -55,7 +53,8 @@ public class User {
     @LastModifiedDate
     private OffsetDateTime updatedAt;
 
-    public User(String email, String password, String name, String picture) {
+    @Builder
+    private User(String email, String password, String name, String picture) {
         this.email = email;
         this.password = password;
         this.name = name;

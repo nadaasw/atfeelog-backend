@@ -4,8 +4,6 @@ services:
     container_name: atfeelog-redis
     restart: unless-stopped
     mem_limit: 100m
-    ports:
-      - "6379:6379"
 
   app:
     image: nadaa97/atfeelog-backend:latest
@@ -13,7 +11,7 @@ services:
     restart: unless-stopped
     mem_limit: 700m
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     env_file:
       - .env
     environment:
@@ -37,3 +35,21 @@ services:
     depends_on:
       redis:
         condition: service_started
+
+  caddy:
+    image: caddy:2
+    container_name: atfeelog-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  caddy_data:
+  caddy_config:
