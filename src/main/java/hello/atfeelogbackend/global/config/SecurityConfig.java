@@ -64,6 +64,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
                 "https://at-feelog-fe.vercel.app",
+                "https://www.atfeelog.site",
+                "https://atfeelog.site",
                 "http://localhost:3000"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
